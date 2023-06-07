@@ -31,7 +31,7 @@ class Decoder(nn.Module):
         
         
     def forward(self, x):
-        
+        x = x.reshape(x.shape[0],512,16,16)
         x = self.upconv1(x)
         x = self.conv2(x)+x
         

@@ -30,5 +30,6 @@ class Encoder(nn.Module):
             x = quant(self.B, x)
         else: 
             x = quant(self.B, x, mode='eval')
+        x = x.flatten(1)
         return x
     
