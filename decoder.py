@@ -10,7 +10,9 @@ def decoder_pipeline(path_to_compress_image, B):
     with open(path_to_compress_image, "r") as f:
         compress_image = f.read()
     f.close()
-    compress_image = decode_haff(compress_image)
+    compress_image = decode_haff(compress_image, B)
+    # lst = compress_image.split("\\S{3}")
+    # print(lst[0])
     compress_image = np.fromstring(compress_image, dtype=int, sep=' ')
     compress_image = torch.from_numpy(compress_image).reshape(1,compress_image.shape[0])
     

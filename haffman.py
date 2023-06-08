@@ -60,16 +60,16 @@ def build_tree(image_path,B=2):
     res = torch.floor(res)
     return res
 
-def encode_haff(s):
-    with open('to_huff.json') as json_file:
+def encode_haff(s,B):
+    with open(f'to_huff_B{B}.json') as json_file:
         data = json.load(json_file)
     res = ''
     for item in s:
         res+=data[item]
     return res
 
-def decode_haff(s):
-    with open('from_huff.json') as json_file:
+def decode_haff(s,B):
+    with open(f'from_huff_B{B}.json') as json_file:
         data = json.load(json_file)
     keys = list(data.keys())
     res = ''
@@ -85,8 +85,8 @@ if __name__=='__main__':
     path = 'test_images'
     keys = ['0','1','2','3','4','5','6','7','8','9',' ']
     haff_dict = dict.fromkeys(keys,0)
-    lens = 0
-    for items in [4,8]:
+    for items in [2,4,8]:
+        lens = 0
         B=items
         for item in ['baboon.png', 'lena.png', 'peppers.png']:
             res = build_tree(os.path.join(path,item), B=B)
@@ -94,20 +94,20 @@ if __name__=='__main__':
             lens += len(str_from_arr)
             for k in keys:
                 haff_dict[k]+= str_from_arr.count(k)
-    for k in keys:
-        haff_dict[k] = round(haff_dict[k]/lens,3)
+        for k in keys:
+            haff_dict[k] = round(haff_dict[k]/lens,3)
         
-    tree = HuffmanTree(haff_dict)
-    tree.get_code()
-    code = tree.dict_for_json
+        tree = HuffmanTree(haff_dict)
+        tree.get_code()
+        code = tree.dict_for_json
 
-    # сохраняем словари чтобы было удобно кодировать и декодировать
-    jsonString = json.dumps(code)
-    jsonFile = open("to_huff.json", "w")
-    jsonFile.write(jsonString)
-    jsonFile.close()
+        # сохраняем словари чтобы было удобно кодировать и декодировать
+        jsonString = json.dumps(code)
+        jsonFile = open(f"to_huff_B{B}.json", "w")
+        jsonFile.write(jsonString)
+        jsonFile.close()
 
-    jsonString = json.dumps(dict(zip(list(code.values()),list(code.keys()))))
-    jsonFile = open("from_huff.json", "w")
-    jsonFile.write(jsonString)
-    jsonFile.close()
+        jsonString = json.dumps(dict(zip(list(code.values()),list(code.keys()))))
+        jsonFile = open(f"from_huff_B{B}.json", "w")
+        jsonFile.write(jsonString)
+        jsonFile.close()

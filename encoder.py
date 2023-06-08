@@ -20,7 +20,7 @@ def encoder_pipeline(image_path,B=2):
     res = torch.floor(res)
     # кодирование хаффмана
     str_from_arr = ' '.join([str(int(item)) for item in res[0].detach().cpu().numpy()])
-    res = encode_haff(str_from_arr)
+    res = encode_haff(str_from_arr,B)
     name = 'results/'+image_path[12:-4]+'/'+image_path[12:-4]+f'B{B}'+".txt"
     with open(name, "w") as file:
         file.write(res)
