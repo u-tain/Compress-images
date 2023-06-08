@@ -14,8 +14,6 @@ def encoder_pipeline(image_path,B=2):
     image = Image.open(image_path).convert("RGB")
     image.load()
     image = np.array(image)
-    # plt.imshow(image)
-    # plt.show()
     image = image/255
     image = T.ToTensor()(image).float()
     image = image.reshape(1,3,512,512)
@@ -28,8 +26,6 @@ def decoder_pipeline(compress_image, B):
     decoder.load_state_dict(torch.load(f'weights\decoder_weights_b{B}.pth'))
     res = decoder(compress_image.float())
     res = torch.sigmoid(res).detach().cpu().numpy()
-    # plt.imshow(res[0].squeeze().transpose(1,2,0))
-    # plt.show()
     return res
 
 if __name__ == '__main__':
@@ -53,6 +49,7 @@ if __name__ == '__main__':
             res = encoder_pipeline(os.path.join(path,item), B=B)
             res2 = decoder_pipeline(res,B)
             res2 = res2[0].squeeze().transpose(1,2,0)
+            print(res)
 
             # сохраняем результат сжатия
             file = Image.fromarray((res2*255).astype(np.uint8))
