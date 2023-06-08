@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import cv2
-import time
 from encoder import encoder_pipeline
 from decoder import decoder_pipeline
 
@@ -69,7 +68,7 @@ if __name__ == '__main__':
     path = 'test_images'
     # закомментировать следующую строчку, если нужно запустить только энкодер или декодер
     run_and_save(jpeg_quality, path)
-    
+
     # чтобы запустить только энкодер для одного изображения, раскомментировать:
     # B=4 # доступные значения 2,4,8
     # item = 'baboon.png' # название желаемого изображения
