@@ -18,10 +18,17 @@ def encoder_pipeline(image_path,B=2):
     image = T.ToTensor()(image).float()
     image = image.reshape(1,3,512,512)
     res = encoder(image) # квантование входит в модель
+    res = torch.floor(res)
     # арифметическое кодирование 
+    print(np.max(res[0].detach().cpu().numpy()))
+    str_from_arr = ' '.join([str(int(item)) for item in res[0].detach().cpu().numpy()])
+    # print(str_from_arr)
     return res
     
 def decoder_pipeline(compress_image, B):
+    # восстановление с помощью кода хаффмана
+    # np.fromstring(str_from_arr, dtype=int, sep=' ')
+    # декодирование сжатого изображения
     decoder = Decoder(B).eval()
     decoder.load_state_dict(torch.load(f'weights\decoder_weights_b{B}.pth'))
     res = decoder(compress_image.float())
@@ -47,9 +54,14 @@ if __name__ == '__main__':
         for item in ['baboon.png', 'lena.png', 'peppers.png']:
             # производим сжатие изображения
             res = encoder_pipeline(os.path.join(path,item), B=B)
+            keys = ['0','1','2','3','4','5','6','7','8','9',' ']
+            haff_dict = dict.fromkeys(keys,0)
+            print(haff_dict)
+            str_from_arr = ' '.join([str(int(item)) for item in res[0].detach().cpu().numpy()])
+            
+
             res2 = decoder_pipeline(res,B)
             res2 = res2[0].squeeze().transpose(1,2,0)
-            print(res)
 
             # сохраняем результат сжатия
             file = Image.fromarray((res2*255).astype(np.uint8))
