@@ -5,6 +5,17 @@ import os
 import cv2
 from encoder import encoder_pipeline
 from decoder import decoder_pipeline
+def make_plot(x1,y1,x2,y2,item):
+    plt.clf()
+    plt.plot(x1,y1,marker='o')
+    plt.plot(x2,y2,marker='o')
+    plt.legend(['jpeg','our'])
+    plt.xlabel('bpp')
+    plt.ylabel('psnr')
+    plt.title('psnr/bpp')
+    plt.savefig('results/'+item+'/'+item)
+    plt.clf()
+
 
 def run_and_save(jpeg_quality,path):
     pixel_number = 512*512
@@ -17,7 +28,7 @@ def run_and_save(jpeg_quality,path):
            'jpeg_lena':[], 'jpeg_peppers':[], 'jpeg_baboon':[],
            }
 
-    for items in [8,4,2]:
+    for items in [2,4,8]:
         B=items
         imgs = []
         for item in ['baboon.png', 'lena.png', 'peppers.png']:
@@ -34,29 +45,21 @@ def run_and_save(jpeg_quality,path):
             psnr[item[:-4]].append(cv2.PSNR(np.array(img),(res2*255).astype(np.uint8)))
 
             # посчитаем метрику для изображений сжатых с помощью JPEG2000
-            for q in jpeg_quality:
-                img = Image.open(os.path.join(path,item)).convert("RGB")
-                img.load()
-                path_jpeg = 'results/'+item[:-4]+'/'+f'{item[:-4]}{q}.jp2'
-                img.convert("RGBA").save(path_jpeg, 'JPEG2000', quality_mode='dB', quality_layers=[q])
-                
-                bite_size = os.stat(path_jpeg).st_size/8
-                bpp['jpeg_'+item[:-4]].append(bite_size/pixel_number)
-                psnr['jpeg_'+item[:-4]].append(cv2.PSNR(cv2.imread(os.path.join(path,item)),cv2.imread(path_jpeg)))
             imgs.append(np.concatenate((np.array(img)/255, res2), axis=1))
         all_imgs.append(np.concatenate(imgs, axis=0))
     
     #сохраняем графики
     for item in ['baboon', 'lena', 'peppers']:
-        plt.clf()
-        plt.plot(bpp[f'jpeg_{item}'],psnr[f'jpeg_{item}'],marker='o')
-        plt.plot(bpp[item],psnr[item],marker='o')
-        plt.legend(['jpeg','our'])
-        plt.xlabel('bpp')
-        plt.ylabel('psnr')
-        plt.title('psnr/bpp')
-        plt.savefig('results/'+item+'/'+item)
-        plt.clf()
+        for q in jpeg_quality:
+                img = Image.open(os.path.join(path,item+'.png')).convert("RGB")
+                img.load()
+                path_jpeg = 'results/'+item+'/'+f'{item}{q}.jp2'
+                img.convert("RGBA").save(path_jpeg, 'JPEG2000', quality_mode='dB', quality_layers=[q])
+                bite_size = os.stat(path_jpeg).st_size/8
+                bpp['jpeg_'+item].append(bite_size/pixel_number)
+                psnr['jpeg_'+item].append(cv2.PSNR(cv2.imread(os.path.join(path,item+'.png')),cv2.imread(path_jpeg)))
+        make_plot(bpp[f'jpeg_{item}'],psnr[f'jpeg_{item}'],
+                  bpp[item],psnr[item],item)
 
     plt.imshow(np.concatenate(all_imgs, axis=1))
     plt.axis('off')
@@ -64,7 +67,7 @@ def run_and_save(jpeg_quality,path):
 
 
 if __name__ == '__main__':
-    jpeg_quality = [19,25,40]
+    jpeg_quality = [20,39,43]
     path = 'test_images'
     # закомментировать следующую строчку, если нужно запустить только энкодер или декодер
     run_and_save(jpeg_quality, path)
