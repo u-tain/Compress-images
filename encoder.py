@@ -12,7 +12,7 @@ def quant(B, image, mode:str='train'):
         return image+torch.from_numpy(matrix).to('cuda')
     else:
         matrix = np.fromfunction(lambda i, j, k, g: (g+1)/(g+1)*(2**B), (image.shape[0], 512, 16, 16), dtype=float)
-        return image*torch.from_numpy(matrix).to('cuda')+0.5
+        return image*torch.from_numpy(matrix)+0.5
     
 
 class Encoder(nn.Module):
