@@ -21,7 +21,8 @@ def encoder_pipeline(image_path,B=2):
     # кодирование хаффмана
     str_from_arr = ' '.join([str(int(item)) for item in res[0].detach().cpu().numpy()])
     res = encode_haff(str_from_arr)
-    name = 'results/'+image_path[12:-4]+'/'+image_path[12:-4]+".txt"
+    print(image_path)
+    name = 'results/'+image_path[12:-4]+'/'+image_path[12:-4]+f'B{B}'+".txt"
     with open(name, "w") as file:
         file.write(res)
     file.close()

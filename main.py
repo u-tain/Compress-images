@@ -7,12 +7,8 @@ import cv2
 from encoder import encoder_pipeline
 from decoder import decoder_pipeline
 
-
-
-if __name__ == '__main__':
+def run_and_save(jpeg_quality,path):
     pixel_number = 512*512
-    jpeg_quality = [19,25,40]
-    path = 'test_images'
     all_imgs = []
     bpp = {'baboon':[],'lena':[],'peppers':[],
            'jpeg_lena':[],'jpeg_peppers':[],'jpeg_baboon':[],
@@ -22,22 +18,17 @@ if __name__ == '__main__':
            'jpeg_lena':[], 'jpeg_peppers':[], 'jpeg_baboon':[],
            }
 
-    for items in [4,8]:
+    for items in [2,4,8]:
         B=items
         imgs = []
         for item in ['baboon.png', 'lena.png', 'peppers.png']:
             # производим сжатие изображения
             res = encoder_pipeline(os.path.join(path,item), B=B)
-
-            res2 = decoder_pipeline('results/'+item[:-4]+'/'+item[:-4]+".txt",B)
-            res2 = res2[0].squeeze().transpose(1,2,0)
-
-            # сохраняем результат сжатия
-            file = Image.fromarray((res2*255).astype(np.uint8))
-            names = item[:-4]+f'B{B}'+item[-4:]
-            file.save(os.path.join('results',item[:-4], names))
+            print('results/'+item[:-4]+'/'+item[:-4]+f'B{B}'+".txt",B)
+            res2 = decoder_pipeline('results/'+item[:-4]+'/'+item[:-4]+f'B{B}'+".txt",B)
 
             # считаем метрики
+            names = item[:-4]+f'B{B}'+item[-4:]
             img = Image.open(os.path.join(path,item)).convert("RGB")
             img.load()
             bite_size = os.stat(os.path.join('results',item[:-4],names)).st_size/8
@@ -70,6 +61,20 @@ if __name__ == '__main__':
     plt.imshow(np.concatenate(all_imgs, axis=1))
     plt.axis('off')
     plt.show()
-   
 
 
+if __name__ == '__main__':
+    jpeg_quality = [19,25,40]
+    path = 'test_images'
+    # закомментировать следующую строчку, если нужно запустить только энкодер или декодер
+    run_and_save(jpeg_quality, path)
+
+    # чтобы запустить только энкодер для одного изображения, раскомментировать:
+    # B=4 # доступные значения 2,4,8
+    # item = 'baboon.png' # название желаемого изображения
+    # result = encoder_pipeline(os.path.join(path,item), B=B) #результат будет находиться в results\baboon\baboon.txt
+
+    # чтобы запустить только декодер для одного изображения, раскомментировать:
+    # B=4 # доступные значения 2,4,8
+    # item = 'baboon.png' # название желаемого изображения
+    # result = decoder_pipeline(os.path.join('results', item[:-4], item[:-4]+f'B{B}.txt'),B)
